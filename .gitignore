@@ -1,0 +1,75 @@
+# =======================================
+# 数据结构课程项目 .gitignore
+# 适用于：C / C++ / VSCode (tasks.json 构建)
+# =======================================
+
+# === 可执行文件与目标文件 ===
+*.exe
+*.out
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.lib
+
+# === VSCode 相关文件 ===
+.vscode/
+# 如果你希望保留任务和调试配置，可取消下面几行注释
+# !.vscode/tasks.json
+# !.vscode/launch.json
+# !.vscode/settings.json
+
+# === 构建缓存与临时目录 ===
+build/
+bin/
+debug/
+release/
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+
+# === 调试与临时文件 ===
+*.log
+*.tmp
+*.bak
+*.swp
+*.suo
+*.user
+*.ncb
+*.pdb
+*.idb
+
+# === 压缩包与导出文件 ===
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# === 实验报告、导出文档 ===
+*.pdf
+*.pptx
+*.docx
+*.xlsx
+*.rtf
+
+# === 系统缓存文件 ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Python / 脚本辅助文件（如用于生成测试数据） ===
+__pycache__/
+*.pyc
+*.pyo
+
+# === 备份或临时数据文件 ===
+*.old
+*.orig
+*.rej
+*.data
+*.dat
+*.in
+*.out.txt

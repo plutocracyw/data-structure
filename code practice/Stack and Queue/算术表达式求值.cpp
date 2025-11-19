@@ -4,132 +4,149 @@
 #include <stack>
 using namespace std;
 
-char ops[] = {'+', '-', '*', '/', '(', ')', '#'};
-int prior[7][7] = {
-    // +    -    *    /    (    )    #
-    {'>', '>', '<', '<', '<', '>', '>'},
-    {'>', '>', '<', '<', '<', '>', '>'},
-    {'>', '>', '>', '>', '<', '>', '>'},
-    {'>', '>', '>', '>', '<', '>', '>'},
-    {'<', '<', '<', '<', '<', '=', ' '},
-    {'>', '>', '>', '>', ' ', '>', '>'},
-    {'<', '<', '<', '<', '<', ' ', '='}};
-
-int getOpIndex(char op)
+enum Priority
 {
-    for (int i = 0; i < 7; ++i)
+    LESS,
+    GREATER,
+    EQUAL,
+    ERROR
+};
+
+Priority getPriority(char stackOp, char currOp)
+{
+    if (stackOp == '(' && currOp == ')')
+        return EQUAL;
+    if (stackOp == '#' && currOp == '#')
+        return EQUAL;
+    if (currOp == ')')
+        return GREATER;
+    if (currOp == '(')
+        return LESS;
+    if (stackOp == '(')
+        return LESS;
+
+    auto getLevel = [](char op) -> int
     {
-        if (ops[i] == op)
-            return i;
-    }
-    return -1;
+        switch (op)
+        {
+        case '#':
+            return 0;
+        case '+':
+        case '-':
+            return 1;
+        case '*':
+        case '/':
+            return 2;
+        default:
+            return -1;
+        }
+    };
+
+    int stackLevel = getLevel(stackOp);
+    int currLevel = getLevel(currOp);
+
+    if (stackLevel == -1 || currLevel == -1)
+        return ERROR;
+
+    return (stackLevel < currLevel) ? LESS : GREATER;
 }
 
-char getPriorityOp(char op1, char op2)
+int performOperation(int a, int b, char op)
 {
-    int i = getOpIndex(op1), j = getOpIndex(op2);
-    if (i == -1 || j == -1)
-        return ' ';
-    return static_cast<char>(prior[i][j]);
+    switch (op)
+    {
+    case '+':
+        return a + b;
+    case '-':
+        return a - b;
+    case '*':
+        return a * b;
+    case '/':
+        if (b == 0)
+            throw runtime_error("Division by zero");
+        return a / b;
+    default:
+        throw runtime_error("Unknown operator");
+    }
 }
 
 int calculateExpression(string expr)
 {
     stack<int> numStack;
     stack<char> opStack;
+
     opStack.push('#');
     expr += '#';
 
     int i = 0;
-    // 关键：循环直到同时遇到 expr[i]=='#' 且 栈顶=='#'
+    int exprLength = expr.length();
+
     while (!(expr[i] == '#' && opStack.top() == '#'))
     {
-
-        // 跳过空格
         if (expr[i] == ' ')
         {
             ++i;
             continue;
         }
 
-        // 数字（多位）
-        if (isdigit(static_cast<unsigned char>(expr[i])))
+        // 🔹处理数字和负数
+        if (isdigit(expr[i]) || (expr[i] == '-' && (i == 0 || expr[i - 1] == '(' || expr[i - 1] == '+' || expr[i - 1] == '-' || expr[i - 1] == '*' || expr[i - 1] == '/')))
         {
+            int sign = 1;
+            if (expr[i] == '-')
+            {
+                sign = -1;
+                ++i;
+            }
             int num = 0;
-            while (i < (int)expr.size() && isdigit(static_cast<unsigned char>(expr[i])))
+            while (i < exprLength && isdigit(expr[i]))
             {
                 num = num * 10 + (expr[i] - '0');
                 ++i;
             }
-            numStack.push(num);
+            numStack.push(sign * num);
+            continue; // 修复关键：读取完数字后跳过下面的运算符处理
         }
-        else
-        {
-            char topOp = opStack.top();
-            char currOp = expr[i];
-            char priority = getPriorityOp(topOp, currOp);
 
-            if (priority == '<')
-            {
-                opStack.push(currOp);
-                ++i;
-            }
-            else if (priority == '>')
-            {
-                opStack.pop();
-                if (numStack.size() < 2)
-                {
-                    cout << "failed, insufficient operands\n";
-                    return 0;
-                }
-                int b = numStack.top();
-                numStack.pop();
-                int a = numStack.top();
-                numStack.pop();
-                int result = 0;
-                switch (topOp)
-                {
-                case '+':
-                    result = a + b;
-                    break;
-                case '-':
-                    result = a - b;
-                    break;
-                case '*':
-                    result = a * b;
-                    break;
-                case '/':
-                    if (b == 0)
-                    {
-                        cout << "failed, division by zero\n";
-                        return 0;
-                    }
-                    result = a / b;
-                    break;
-                default:
-                    cout << "failed, unknown operator: " << topOp << endl;
-                    return 0;
-                }
-                numStack.push(result);
-            }
-            else if (priority == '=')
-            {
-                opStack.pop();
-                ++i;
-            }
-            else
-            {
-                cout << "failed, invalid character or missing priority: '" << currOp << "'" << endl;
-                return 0;
-            }
+        // 🔹处理运算符
+        char currentChar = expr[i];
+        char topOperator = opStack.top();
+        Priority priority = getPriority(topOperator, currentChar);
+
+        switch (priority)
+        {
+        case LESS:
+            opStack.push(currentChar);
+            ++i;
+            break;
+
+        case GREATER:
+        {
+            opStack.pop();
+            if (numStack.size() < 2)
+                throw runtime_error("Insufficient operands");
+            int rightOperand = numStack.top();
+            numStack.pop();
+            int leftOperand = numStack.top();
+            numStack.pop();
+            int result = performOperation(leftOperand, rightOperand, topOperator);
+            numStack.push(result);
+            break;
+        }
+
+        case EQUAL:
+            opStack.pop();
+            ++i;
+            break;
+
+        case ERROR:
+            throw runtime_error("Syntax error");
         }
     }
 
     if (numStack.empty())
-    {
-        cout << "failed, no result\n";
-        return 0;
-    }
+        throw runtime_error("No result found");
+
     return numStack.top();
 }
 
@@ -137,8 +154,18 @@ int main()
 {
     string expr;
     cout << "Enter an arithmetic expression: ";
+    cin >> ws;
     getline(cin, expr);
-    int result = calculateExpression(expr);
-    cout << "Result: " << result << endl;
+
+    try
+    {
+        int result = calculateExpression(expr);
+        cout << "Result: " << result << endl;
+    }
+    catch (const exception &e)
+    {
+        cout << "Error: " << e.what() << endl;
+    }
+
     return 0;
 }

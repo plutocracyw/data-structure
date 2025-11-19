@@ -19,36 +19,47 @@
 #include <vector>
 using namespace std;
 
-struct SqStack{
-    vector<int> data;    //保存栈元素
-    int maxSize;
-    SqStack(int size): maxSize(size) {}
+class SqStack
+{
+private:
+    vector<int> data; // 保存栈元素
+    unsigned int maxSize;
+public:
+    SqStack(unsigned int size) : maxSize(size) {}
 
-    bool isFull(){
+    bool isFull()
+    {
         return data.size() >= maxSize;
     }
 
-    bool isEmpty(){
+    bool isEmpty()
+    {
         return data.empty();
     }
 
-    void push(int x){
-        if(!isFull()){
+    void push(int x)
+    {
+        if (!isFull())
+        {
             data.push_back(x);
         }
     }
 
-    int pop(){
-        if(!isEmpty()){
-            int x=data.back();
+    int pop()
+    {
+        if (!isEmpty())
+        {
+            int x = data.back();
             data.pop_back();
             return x;
         }
         return -1;
     }
 
-    int top(){
-        if(!isEmpty()){
+    int top()
+    {
+        if (!isEmpty())
+        {
             return data.back();
         }
         return -1;
@@ -56,43 +67,50 @@ struct SqStack{
 };
 
 // 生成所有可能的出栈序列
-void generate(int n,int inNext,SqStack &s,vector<int>&output,int &count){
+void generate(int n, int inNext, SqStack &s, vector<int> &output, int &count)
+{
     // 若输入和栈都空，说明形成了一个完整的输出序列
-    if(inNext>n && s.isEmpty()){
-        //输出结果
+    if (inNext > n && s.isEmpty())
+    {
+        // 输出结果
         ++count;
-        cout<<"Sequence "<<count<<": ";
-        for(int i=0;i<output.size();i++){
+        cout << "Sequence " << count << ": ";
+        for (unsigned int i = 0; i < output.size(); i++)
+        {
             cout << output[i] << (i == output.size() - 1 ? '\n' : ' ');
         }
         return;
     }
 
-    //如果还有车厢没进栈，可以选择进栈
-    if(inNext <= n){
+    // 如果还有车厢没进栈，可以选择进栈
+    if (inNext <= n)
+    {
         s.push(inNext);
-        generate(n,inNext+1,s,output,count);
-        s.pop(); //回溯
+        generate(n, inNext + 1, s, output, count);
+        s.pop(); // 回溯
     }
 
-    //如果栈不空，可以选择出栈
-    if(!s.isEmpty()){
+    // 如果栈不空，可以选择出栈
+    if (!s.isEmpty())
+    {
         output.push_back(s.top());
         s.pop();
-        generate(n,inNext,s,output,count);
+        generate(n, inNext, s, output, count);
         s.push(output.back());
         output.pop_back();
     }
 }
 
-
-int main(){
+int main()
+{
     int n;
-    cout<<"Please enter the number of cars: ";
+    cout << "Please enter the number of cars: ";
 
-    while(cin>>n){
-        if(n==-1) {
-            cout<<"Exiting program."<<endl;
+    while (cin >> n)
+    {
+        if (n == -1)
+        {
+            cout << "Exiting program." << endl;
             break;
         }
 
@@ -100,11 +118,44 @@ int main(){
         vector<int> output;
         int count = 0;
 
-        cout<<"All possible departure sequences are:\n";
-        generate(n,1,s,output,count);
-        cout<<"Total sequences: "<<count<<endl;
-        cout<<"Please enter the number of cars: ";
+        cout << "All possible departure sequences are:\n";
+        generate(n, 1, s, output, count);
+        cout << "Total sequences: " << count << endl;
+        cout << "Please enter the number of cars: ";
     }
 
     return 0;
 }
+
+/*
+递归回溯算法适用于解决多种组合优化和搜索问题
+
+1.排列组合问题
+车厢调度：n个元素的出栈序列（卡特兰数问题）
+
+全排列：生成所有可能的排列
+
+组合问题：从n个元素中选k个的所有组合
+
+子集问题：求集合的所有子集
+
+2. 路径搜索问题
+迷宫求解：找到从起点到终点的所有路径
+
+八皇后问题：在棋盘上放置皇后使其互不攻击
+
+数独求解：填充数字满足数独规则
+
+图的遍历：深度优先搜索所有路径
+
+3. 决策序列问题
+括号生成：生成所有有效的括号组合
+
+表达式求值：不同的运算顺序
+
+任务调度：不同的执行顺序
+
+资源分配：不同的分配方案
+
+
+*/

@@ -49,9 +49,6 @@ cmake_install.cmake
 *.gz
 
 # === 实验报告、导出文档 ===
-*.pdf
-*.pptx
-*.docx
 *.xlsx
 *.rtf
 

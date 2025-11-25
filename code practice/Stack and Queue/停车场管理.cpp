@@ -11,14 +11,15 @@ struct Car
 // ===== 顺序栈（停车场） =====
 struct SeqStack
 {
-    Car *data;
-    int top;
+    Car *data; // 存储车的数组
+    int top;  // 栈顶指针
     int maxSize;
 
     SeqStack(int size) : top(-1), maxSize(size)
     {
         data = new Car[maxSize];
     }
+
     ~SeqStack() { delete[] data; }
 
     bool isEmpty() { return top == -1; }
@@ -33,13 +34,7 @@ struct SeqStack
     {
         if (!isEmpty())
             return data[top--];
-        return Car{-1, -1};
-    }
-    Car getTop()
-    {
-        if (!isEmpty())
-            return data[top];
-        return Car{-1, -1};
+        return Car{-1, -1};// 栈空返回无效车
     }
 };
 
@@ -55,6 +50,7 @@ struct LinkQueue
 {
     QNode *front;
     QNode *rear;
+
     LinkQueue() : front(nullptr), rear(nullptr) {}
     ~LinkQueue()
     {
@@ -100,14 +96,14 @@ void carArrive(SeqStack &parking, LinkQueue &waiting, int carNum, int time)
     if (!parking.isFull())
     {
         parking.push(Car{carNum, time});
-        cout << "Car " << carNum << " arrived at time " << time
-             << " and entered parking lot." << endl;
+        cout << "Car " << carNum << " arrived at time " << time 
+            << " and entered parking lot." << endl;
     }
     else
     {
         waiting.enQueue(Car{carNum, time});
         cout << "Car " << carNum << " arrived at time " << time
-             << " and is waiting in queue." << endl;
+            << " and is waiting in queue." << endl;
     }
 }
 

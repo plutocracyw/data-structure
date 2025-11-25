@@ -89,7 +89,7 @@ int calculateExpression(string expr)
             continue;
         }
 
-        // 🔹处理数字和负数
+        // 处理数字和负数
         if (isdigit(expr[i]) || (expr[i] == '-' && (i == 0 || expr[i - 1] == '(' || expr[i - 1] == '+' || expr[i - 1] == '-' || expr[i - 1] == '*' || expr[i - 1] == '/')))
         {
             int sign = 1;
@@ -108,7 +108,7 @@ int calculateExpression(string expr)
             continue; // 修复关键：读取完数字后跳过下面的运算符处理
         }
 
-        // 🔹处理运算符
+        // 处理运算符
         char currentChar = expr[i];
         char topOperator = opStack.top();
         Priority priority = getPriority(topOperator, currentChar);

@@ -11,9 +11,9 @@ using namespace std;
 // Elevator state enumeration
 enum ElevatorState
 {
-    Idle,
-    GoingUp,
-    GoingDown
+    Idle, // 空闲状态
+    GoingUp,//上升状态
+    GoingDown//下降状态
 };
 
 const int FLOORS = 5;     // Total floors (0–4)
@@ -39,15 +39,15 @@ class Elevator
 public:
     int currentFloor;
     ElevatorState state;
-    vector<bool> callCar; // Elevator internal floor buttons
-    queue<int> upStops;   // Upward stop queue
-    queue<int> downStops; // Downward stop queue
-    int idleTime;         // Idle time counter
+    vector<bool> callCar; // 电梯内部按钮
+    queue<int> upStops;   // 外部上行呼叫队列（记录按上按钮的楼层）
+    queue<int> downStops; // 外部下行呼叫队列（记录按下按钮的楼层）
+    int idleTime;         // 空闲时间计数器，用于超时返回基楼
 
     Elevator()
         : currentFloor(BASE_FLOOR), state(Idle), callCar(FLOORS, false), idleTime(0) {}
 
-    // Handle internal button press
+    // 内部按钮处理
     void pressCarButton(int floor)
     {
         if (floor < 0 || floor >= FLOORS || floor == currentFloor)
@@ -59,7 +59,7 @@ public:
             state = GoingDown;
     }
 
-    // Handle external call buttons
+    // 外部呼叫按钮处理
     void pressCallButton(int floor, bool isUp)
     {
         if (floor < 0 || floor >= FLOORS)
@@ -68,20 +68,21 @@ public:
             upStops.push(floor);
         else if (!isUp && floor > 0)
             downStops.push(floor);
+
+        // 如果电梯空闲，更新状态
         if (state == Idle)
         {
             state = (floor > currentFloor) ? GoingUp : GoingDown;
         }
     }
 
-    // Move one floor and update state
     void moveOneFloor()
     {
         if (state == GoingUp)
             currentFloor++;
         else if (state == GoingDown)
             currentFloor--;
-        idleTime = 0;
+        idleTime = 0;  //  有动作则重置空闲计时器
     }
 
     // Handle stopping at a floor (passengers in/out, state changes)
